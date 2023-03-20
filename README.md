@@ -5,11 +5,11 @@ backend for a program which visualizes listening statistics for ViMusic (https:/
 
 currently only returns most listened songs, in minutes
 
-#how it works
+# how it works
 ViMusic saves listening statistics to a sqlite table, for backup purposes\
 this table has been exploited for some other purposes
 
-#preresiquites
+# preresiquites
 ViMusic backup table,\
 Python,\
 matplotlib
