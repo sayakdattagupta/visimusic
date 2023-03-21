@@ -1,5 +1,5 @@
 # visimusic
-backend for a program which visualizes listening statistics for ViMusic (https://github.com/vfsfitvnm/ViMusic)
+backend for a flask program which visualizes listening statistics for ViMusic (https://github.com/vfsfitvnm/ViMusic)
 
 ![alt text](https://i.ibb.co/B4KjhYg/Figure-1.png)
 
@@ -12,4 +12,8 @@ this table has been exploited for some other purposes
 # preresiquites
 ViMusic backup table,\
 Python,\
+flask,\
 matplotlib
+
+# changelog
+21.03.23 - program has been ported to flask
