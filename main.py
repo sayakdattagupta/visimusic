@@ -1,32 +1,55 @@
-import sqlite3, matplotlib.pyplot as plt
+from flask import Flask, render_template, request, redirect, url_for
+from werkzeug.utils import secure_filename
+import sqlite3
+import matplotlib.pyplot as plt
 from matplotlib import style
+import io
+import os
+import base64
 
-table = sqlite3.connect('ENTER DATABASE DIRECTORY')
+app = Flask(__name__)
 
-cursor = table.cursor()
-    
-def graph_mostlistenedsongs():
-    cursor.execute('SELECT title, totalPlayTimeMs FROM Song ORDER BY totalPlayTimeMs DESC LIMIT 10')
-    data = cursor.fetchall()
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    if request.method == 'POST':
+        file = request.files['database']
+        if file:
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(filename))
+        conn = sqlite3.connect(file.filename)
+        cursor = conn.cursor()
 
-    song = []
-    listeningtime = []
-    
-    for row in data:
-        song.append(row[0])
-        listeningtime.append(row[1])
+        cursor.execute('SELECT title, totalPlayTimeMs FROM Song ORDER BY totalPlayTimeMs DESC LIMIT 10')
+        data = cursor.fetchall()
 
-    listeningtime = [x / 60000 for x in listeningtime]
+        song = []
+        listeningtime = []
 
-    song = [x[:16]+"..." for x in song]
+        fig, ax = plt.subplots()
 
-    plt.style.use('fivethirtyeight')
-    plt.rc('font', size=8) 
-    plt.bar(song,listeningtime,width=0.50)
-    plt.xlabel("Song Name")
-    plt.ylabel("Listening time in Minutes")
-    plt.show()
+        for row in data:
+            song.append(row[0])
+            listeningtime.append(row[1])
 
-graph_mostlistenedsongs()
-cursor.close
-table.close()
+        listeningtime = [x / 60000 for x in listeningtime]
+
+        song = [x[:16]+"..." for x in song]
+
+        plt.style.use('fivethirtyeight')
+        ax.invert_yaxis()
+        ax.barh(song,listeningtime,align='center')
+        ax.set_xlabel("Listening time in Minutes")
+        ax.set_ylabel("Song Name")
+
+        img = io.BytesIO()
+        fig.tight_layout()
+        plt.savefig(img, format='png')
+        img.seek(0)
+        plot_url = base64.b64encode(img.getvalue()).decode()
+
+        return render_template('graph.html', plot_url=plot_url)
+    else:
+        return render_template('upload.html')
+
+if __name__ == '__main__':
+    app.run(debug=True)
